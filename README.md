@@ -2,7 +2,7 @@
 
 * install requirement if not installed
   ```sh
-  pip install requirement.txt
+  pip install requirements.txt
   ```  
 
 * To run the code
