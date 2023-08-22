@@ -7,5 +7,5 @@
 
 * To run the code
   ```sh
-  python telegram.py
+  python main.py
   ``` 
