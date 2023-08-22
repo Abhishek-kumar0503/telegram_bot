@@ -1,48 +1,46 @@
-#correct
-import requests
 import re
+import requests
+from flask import Flask, request, jsonify
 
-base_url = "https://api.telegram.org/bot6376673556:AAFUw21pWQ3vPv1BZLDtl2_Xf23iMEmYFLA"
+app = Flask(__name__)
+
+# Replace 'YOUR_BOT_TOKEN' with your actual Telegram bot token.
+bot_token = "6376673556:AAFUw21pWQ3vPv1BZLDtl2_Xf23iMEmYFLA"
+base_url = f"https://api.telegram.org/bot{bot_token}/"
 
 def get_chat_id(update):
     return update["message"]["chat"]["id"]
 
-def read_msg(offset):
-    parameter = {
-        "offset": offset
-    }
-    resp = requests.get(base_url + "/getUpdates", params=parameter)
-    data = resp.json()
+def is_valid_url(url):
+    return re.match(r'^(http|https)://', url) is not None
 
-    print(data)
-    for result in data.get("result", []):
-        message = result.get("message", {}).get("text")
-        chat_id = get_chat_id(result)
-        if message and is_valid_url(message):
-            response = requests.get(message)
-            message_text = response.url
-            recording_id = re.search(r'recordingId=(\d+)', message_text)
-            if recording_id:
-                v = recording_id.group(1)
-                send_msg(chat_id, f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4")
-        else:
-            send_msg(chat_id, "Invalid or missing recording ID. Please provide a valid link.")
-
-    if "result" in data and data["result"]:
-        return data["result"][-1]["update_id"] + 1
+def read_msg(update):
+    message_text = update.get("message", {}).get("text")
+    chat_id = get_chat_id(update)
+    if message_text and is_valid_url(message_text):
+        response = requests.get(message_text)
+        message = response.url
+        recording_id = re.search(r'recordingId=(\d+)', message)
+        if recording_id:
+            v = recording_id.group(1)
+            send_msg(chat_id, f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4")
+    else:
+        send_msg(chat_id, "Invalid or missing recording ID. Please provide a valid link.")
 
 def send_msg(chat_id, text):
     if chat_id:
         parameter = {
             "chat_id": chat_id,
-            "text": text if text else "This url will not exist please check it"
+            "text": text if text else "This URL will not exist. Please check it."
         }
-        resp = requests.post(base_url + "/sendMessage", json=parameter)
+        requests.post(base_url + "sendMessage", data=parameter)
 
-def is_valid_url(url):
-    return re.match(r'^https?://', url) is not None
+@app.route("/webhook", methods=["POST","GET"])
+def webhook():
+    if request.method == "POST":
+        update = request.json
+        read_msg(update)
+    return jsonify({"status": "ok"})
 
-
-offset = 0
-while True:
-    offset = read_msg(offset)
+if __name__ == "__main__":
+    app.run(debug=True)
