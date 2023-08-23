@@ -23,8 +23,7 @@ def read_msg(update):
         recording_id = re.search(r'recordingId=(\d+)', message)
         if recording_id:
             v = recording_id.group(1)
-            video_url = f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4"
-                send_video(chat_id, video_url)
+            send_msg(chat_id, f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4")
     else:
         send_msg(chat_id, "Invalid or missing recording ID. Please provide a valid link.")
 
@@ -36,16 +35,6 @@ def send_msg(chat_id, text):
         }
         requests.post(base_url + "sendMessage", data=parameter)
 
-def send_video(chat_id, video_url):
-    if chat_id:
-        parameter = {
-            "chat_id": chat_id,
-        }
-        files = {
-            "video": requests.get(video_url).content
-        }
-        resp = requests.post(base_url + "/sendVideo", data=parameter, files=files)
-        
 @app.route("/webhook", methods=["POST","GET"])
 def webhook():
     if request.method == "POST":
