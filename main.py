@@ -35,8 +35,6 @@ def send_msg(chat_id, text):
         }
         requests.post(base_url + "sendMessage", data=parameter)
 
-
-        
 @app.route("/webhook", methods=["POST","GET"])
 def webhook():
     if request.method == "POST":
