@@ -26,7 +26,7 @@ def read_msg(update):
             video_url = f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4"
             send_video(chat_id, video_url)
     else:
-        send_msg(chat_id, "1234Invalid or missing recording ID. Please provide a valid link.")
+        send_msg(chat_id, "123456Invalid or missing recording ID. Please provide a valid link.")
 
 def send_msg(chat_id, text):
     if chat_id:
@@ -41,8 +41,11 @@ def send_video(chat_id, video_url):
         parameter = {
             "chat_id": chat_id,
         }
+        r = requests.get(video_url)  
+        with open(r'./audio.m4a', 'wb') as f:
+            f.write(r.content)
         files = {
-            "audio": requests.get(video_url).content
+            "audio": open(r'./audio.m4a', 'wb')
         }
         resp = requests.post(base_url + "sendAudio", data=parameter, files=files)
         
