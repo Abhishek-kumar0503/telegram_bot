@@ -18,7 +18,7 @@ def read_msg(update):
     message = update.get("message", {}).get("text")
     start_index = message.find("recordingId=")
     end_index = message.find("&", start_index)
-    chat_id = get_chat_id(result)
+    chat_id = get_chat_id(update)
     if start_index != -1 and end_index != -1:
         recording_id = message[start_index + len("recordingId="):end_index]
         print(recording_id)
