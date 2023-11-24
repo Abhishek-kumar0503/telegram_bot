@@ -15,18 +15,17 @@ def is_valid_url(url):
     return re.match(r'^(http|https)://', url) is not None
 
 def read_msg(update):
-    message_text = update.get("message", {}).get("text")
-    chat_id = get_chat_id(update)
-    if message_text and is_valid_url(message_text):
-        response = requests.get(message_text)
-        message = response.url
-        recording_id = re.search(r'recordingId=(\d+)', message)
-        if recording_id:
-            v = recording_id.group(1)
-            video_url = f"https://static.smpopular.com/production/uploading/recordings/{v}/master.mp4"
-            send_video(chat_id, video_url)
+    message = update.get("message", {}).get("text")
+    start_index = message.find("recordingId=")
+    end_index = message.find("&", start_index)
+    chat_id = get_chat_id(result)
+    if start_index != -1 and end_index != -1:
+        recording_id = message[start_index + len("recordingId="):end_index]
+        print(recording_id)
+        video_url = f"https://static.smpopular.com/production/uploading/recordings/{recording_id}/master.mp4"
+        send_video(chat_id, video_url)
     else:
-        send_msg(chat_id, "12345678Invalid or missing recording ID. Please provide a valid link.")
+        send_msg(chat_id, "Invalid or missing recording ID. Please provide a valid link.")
 
 def send_msg(chat_id, text):
     if chat_id:
