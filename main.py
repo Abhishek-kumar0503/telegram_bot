@@ -11,11 +11,25 @@ base_url = f"https://api.telegram.org/bot{bot_token}/"
 def get_chat_id(update):
     return update["message"]["chat"]["id"]
 
-def is_valid_url(url):
-    return re.match(r'^(http|https)://', url) is not None
+# def is_valid_url(url):
+#     return re.match(r'^(http|https)://', url) is not None
 
+def extract_main_link(input_data):
+    A = input_data
+    match = re.search(r'https://tmx28\.app\.goo\.gl/\w+', input_data)
+    if match:
+        link = match.group()
+    else:
+        link = input_data
+    try:
+        return requests.head(link, allow_redirects=True).url
+    except Exception as e:
+        return A
+        
 def read_msg(update):
-    message = update.get("message", {}).get("text")
+    messages = update.get("message", {}).get("text")
+    print(messages)
+    message= extract_main_link(messages)
     print(message)
     url_pattern = re.compile(r'https?://\S+')
     urls = re.findall(url_pattern, message)
